@@ -1,0 +1,8 @@
+{
+	"patient_id": {":subst": "patient_id"},
+	"file_reference":  {":subst": "file_reference"},
+	"image_scan_data":  {":subst": "image_scan_data"},
+	"image_scan_data_2ndary":  {":subst": "image_scan_data_2ndary"},
+	"study_datetime":  {":subst": "study_datetime"},
+	"eye": {":subst": "eye"}
+}
