@@ -5,7 +5,8 @@ class m220808_135526_archive_module extends OEMigration
 	// Use safeUp/safeDown to do migration with transaction
 	public function safeUp()
 	{
-		$archive_table_name = "archive_ophinkowastereo_event";
+		$archive_event_table_name = "archive_ophinkowastereo_event";
+		$measure_type_class_name = "OphInKowastereo_Field_Measurement";
 
         // find event type id
         $kowa_stereo_event_type_id = $this->getDbConnection()
@@ -13,8 +14,8 @@ class m220808_135526_archive_module extends OEMigration
             ->queryScalar();
 
 		// copy kowa events to new table
-		$this->execute("CREATE TABLE $archive_table_name SELECT * FROM event WHERE event_type_id = $kowa_stereo_event_type_id");
-		$this->execute("ALTER TABLE $archive_table_name ADD PRIMARY KEY (id)");
+		$this->execute("CREATE TABLE $archive_event_table_name SELECT * FROM event WHERE event_type_id = $kowa_stereo_event_type_id");
+		$this->execute("ALTER TABLE $archive_event_table_name ADD PRIMARY KEY (id)");
 
 		// reassign event_id related foreign keys to archive table
 		foreach([
@@ -24,8 +25,17 @@ class m220808_135526_archive_module extends OEMigration
 			"et_ophinkowastereo_result" => "et_ophinkowastereo_result_event_id_fk"
 			] as $table_name => $foreign_key_name) {
 				$this->execute("ALTER TABLE $table_name DROP CONSTRAINT $foreign_key_name");	
-				$this->execute("ALTER TABLE $table_name ADD CONSTRAINT $foreign_key_name FOREIGN KEY (event_id) REFERENCES $archive_table_name (id)");
+				$this->execute("ALTER TABLE $table_name ADD CONSTRAINT $foreign_key_name FOREIGN KEY (event_id) REFERENCES $archive_event_table_name (id)");
 		};
+
+		// measurement references
+		$this->execute("DELETE FROM measurement_reference WHERE event_id IN (SELECT id FROM $archive_event_table_name)");
+
+		// patient measurement
+		$this->execute("DELETE FROM patient_measurement WHERE measurement_type_id = (SELECT id FROM measurement_type WHERE class_name = '$measure_type_class_name')");
+
+		// measurement type
+		$this->execute("DELETE from measurement_type WHERE class_name = '$measure_type_class_name'");
 
 		// delete archived kowastereo events from event table
 		$this->execute("DELETE FROM event WHERE event_type_id = $kowa_stereo_event_type_id");
