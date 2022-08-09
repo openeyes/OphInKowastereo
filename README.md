@@ -20,6 +20,8 @@ In an ideal world, we would delete the relevant `ProtectedFile` instances that h
 1. write a yiic command in this module that uses the protected file references to delete the database entres and files from the system.
 1. write an "orphaned protected file" clean up script in core that could do a similar thing, but would of course work for all possible causes of orphaned files. This would need to work on files over a certain age, and would assume that foreign key constraints would be defined for all references (i.e. leveraging the `RESTRICT` instruction of the `ON DELETE` clause of the FK definition)
 
+User foreign key constraints remain in archive tables, this may cause issues deleting legacy users.
+
 ### SQL to test migration
 
 Build at least one Kowa Stereo event
