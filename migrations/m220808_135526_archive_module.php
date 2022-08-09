@@ -32,6 +32,8 @@ class m220808_135526_archive_module extends OEMigration
 		$this->execute("DELETE FROM measurement_reference WHERE event_id IN (SELECT id FROM $archive_event_table_name)");
 
 		// patient measurement
+		// drop foreign key constraint to allow deletion of patient_measurement data
+		$this->execute("ALTER TABLE ophinkowastereo_field_measurement DROP CONSTRAINT ophinkowastereo_field_measurement_pm_id_fk");
 		$this->execute("DELETE FROM patient_measurement WHERE measurement_type_id = (SELECT id FROM measurement_type WHERE class_name = '$measure_type_class_name')");
 
 		// measurement type

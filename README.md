@@ -44,14 +44,21 @@ INSERT INTO et_ophinkowastereo_result (event_id, other) values (@event_id, "Foo 
 SELECT last_insert_id() INTO @result_element_id;
 INSERT INTO et_ophinkowastereo_result_assessment_assignment (element_id, ophinkowastereo_result_assessment_id, deleted) values (@result_element_id, @result_assessment_id, 0);
 
-SELECT COUNT(*) FROM event WHERE event_type_id=@event_type_id;
+SELECT id FROM protected_file ORDER BY RAND() LIMIT 1 INTO @protected_file_id;
+SELECT id FROM patient ORDER BY RAND() LIMIT 1 INTO @patient_id;
+SELECT id FROM measurement_type WHERE class_name = "OphInKowastereo_Field_Measurement" INTO @measurement_type_id;
+INSERT INTO patient_measurement (patient_id, measurement_type_id) values (@patient_id, @measurement_type_id);
+SELECT last_insert_id() INTO @patient_measurement_id;
+INSERT INTO ophinkowastereo_field_measurement (patient_measurement_id, eye_id, image_id, study_datetime) values (@patient_measurement_id, 3, @protected_file_id, now());
 `
 
-Make a note of the number of events returned by the last statement.
+Make a note of the number of kowa events in databse.
+`SELECT COUNT(*) FROM event WHERE event_type_id=@event_type_id;`
 
 Run the migration
 
-`
-SELECT COUNT(*) FROM archive_ophinkowastereo_event;
-SELECT COUNT(*) FROM event WHERE event_type_id=@event_type_id;
-`
+Should match previous count
+`SELECT COUNT(*) FROM archive_ophinkowastereo_event;`
+
+Should now be zero
+`SELECT COUNT(*) FROM event WHERE event_type_id=@event_type_id;`
